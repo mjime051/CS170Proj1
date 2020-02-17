@@ -1,6 +1,16 @@
 #include "Node.h"
 #include <string.h>
 #include <stdio.h>
+#include <queue>
+
+bool Search(Node* root, int option) {
+	bool solution = false;
+	std::priority_queue<Node*> frontier;
+	frontier.push(root);
+	while (!frontier.empty()) {
+		//do stuff
+	}
+}
 
 int main() {
 	int puzzle[3][3] = { {1,2,3}, {4,5,6}, {7,0,8} };
