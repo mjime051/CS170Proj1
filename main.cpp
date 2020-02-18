@@ -9,7 +9,7 @@ int goal[3][3] = { {1,2,3}, {4,5,6}, {7,8,0} };
 
 struct compareNodes {
 	bool operator()(Node* n1, Node* n2) {
-		return n1->getCost() < n2->getCost();
+		return n1->getCost() > n2->getCost();
 	}
 };
 
@@ -54,12 +54,45 @@ bool checkExplored(Node* n1, std::vector<Node*> explored) {
 	}
 }
 
+int numMismatch(Node* n1) {
+	int count = 0;
+	for (int i = 0; i < 3; i++)
+	{
+		for (int j = 0; j < 3; j++) {
+			if (n1->state[i][j] != goal[i][j]) {
+				count++;
+			}
+		}
+	}
+	return count;
+}
+
+int numManhattan(Node* n1) {
+	//TODO
+	return 0;
+}
+
+int chooseCost(Node* n1, int option) {
+	if (option == 1)
+	{
+		return n1->getCost() + 1;
+	}
+	else if(option == 2)
+	{
+		return n1->getCost() + numMismatch(n1);
+	}
+	else if (option == 3) {
+		return n1->getCost() + numManhattan(n1);
+	}
+}
+
 bool Search(Node* root, int option) {
 	bool solution = true;
 	std::priority_queue<Node*, std::vector<Node*>, compareNodes> frontier;
 	frontier.push(root);
 	std::vector<Node*> explored;
 	Node* curr;
+	int numChildrenCreated = 0;
 	while (!frontier.empty()) {
 		if (frontier.empty()) {
 			std::cout << "There was no solution" << std::endl;
@@ -67,7 +100,7 @@ bool Search(Node* root, int option) {
 		}
 		curr = frontier.top();
 		frontier.pop();
-		//curr->printState();
+		curr->printState();
 		if (checkExplored(curr,explored))
 		{
 			continue;
@@ -76,12 +109,12 @@ bool Search(Node* root, int option) {
 		if (solution)
 		{
 			std::cout << "There was a solution!" << std::endl;
-			std::cout << "Amount of steps taken was " << curr->level << std::endl;
+			std::cout << "Amount of steps taken was " << curr->getLevel() << std::endl;
 			return true;
 		}
 		explored.push_back(curr);
+		//std::cout << "Number of nodes in explored is " << explored.size() << std::endl;
 		//check which operations you can make
-
 		int currBlankX = curr->getBlankX();
 		int currBlankY = curr->getBlankY();
 		//can move up! so do it
@@ -93,13 +126,17 @@ bool Search(Node* root, int option) {
 			newState[currBlankX-1][currBlankY] = 0;
 			newState[currBlankX][currBlankY] = temp;
 			//create new child
-			Node* childUp = new Node(newState, curr, curr->getCost() + 1, curr->level++);
+			//std::cout << "Curr cost is " << curr->getCost() << std::endl;
+			//std::cout << "Updated up cost is now " << chooseCost(curr, option) << std::endl;
+			Node* childUp = new Node(newState, curr, chooseCost(curr,option), curr->getLevel() + 1);
 			bool addChildUp = checkExplored(childUp,explored);
 			//check explored set for the newly created child
 			
 			//if it made it through the last two checks and it is still true then push it into frontier
 			if (!addChildUp)
 			{
+				numChildrenCreated++;
+				//std::cout << "number of children created so far is " << numChildrenCreated << std::endl;
 				frontier.push(childUp);
 			}
 		}
@@ -112,13 +149,17 @@ bool Search(Node* root, int option) {
 			newState[currBlankX + 1][currBlankY] = 0;
 			newState[currBlankX][currBlankY] = temp;
 			//create new child
-			Node* childDown = new Node(newState, curr, curr->getCost() + 1, curr->level++);
+			//std::cout << "Curr cost is " << curr->getCost() << std::endl;
+			//std::cout << "Updated down cost is now " << chooseCost(curr, option) << std::endl;
+			Node* childDown = new Node(newState, curr, chooseCost(curr,option), curr->getLevel() + 1);
 			bool addChildDown = checkExplored(childDown, explored);
 			//check explored set for the newly created child
 
 			//if it made it through the last two checks and it is still true then push it into frontier
 			if (!addChildDown)
 			{
+				numChildrenCreated++;
+				//std::cout << "number of children created so far is " << numChildrenCreated << std::endl;
 				frontier.push(childDown);
 			}
 		}
@@ -131,13 +172,17 @@ bool Search(Node* root, int option) {
 			newState[currBlankX][currBlankY-1] = 0;
 			newState[currBlankX][currBlankY] = temp;
 			//create new child
-			Node* childLeft = new Node(newState, curr, curr->getCost() + 1, curr->level++);
+			//std::cout << "Curr cost is " << curr->getCost() << std::endl;
+			//std::cout << "Updated left cost is now " << chooseCost(curr, option) << std::endl;
+			Node* childLeft = new Node(newState, curr, chooseCost(curr, option), curr->getLevel() + 1);
 			bool addChildLeft = checkExplored(childLeft, explored);
 			//check explored set for the newly created child
 
 			//if it made it through the last two checks and it is still true then push it into frontier
 			if (!addChildLeft)
 			{
+				numChildrenCreated++;
+				//std::cout << "number of children created so far is " << numChildrenCreated << std::endl;
 				frontier.push(childLeft);
 			}
 		}
@@ -150,13 +195,17 @@ bool Search(Node* root, int option) {
 			newState[currBlankX][currBlankY + 1] = 0;
 			newState[currBlankX][currBlankY] = temp;
 			//create new child
-			Node* childRight = new Node(newState, curr, curr->getCost() + 1, curr->level++);
+			//std::cout << "Curr cost is " << curr->getCost() << std::endl;
+			//std::cout << "Updated right cost is now " << chooseCost(curr, option) << std::endl;
+			Node* childRight = new Node(newState, curr, chooseCost(curr, option), curr->getLevel() + 1);
 			bool addChildRight = checkExplored(childRight, explored);
 			//check explored set for the newly created child
 
 			//if it made it through the last two checks and it is still true then push it into frontier
 			if (!addChildRight)
 			{
+				numChildrenCreated++;
+				//std::cout << "number of children created so far is " << numChildrenCreated << std::endl;
 				frontier.push(childRight);
 			}
 		}
@@ -170,7 +219,7 @@ int main() {
 	std::cout << "Would you like to run the program with a test puzzle(1) or input your own(2)?" << std::endl;
 	std::cin >> input;
 	if (input == 1) {
-		//do nothing and leave puzzle as easy puzzle
+		//do nothing and leave puzzle default
 		for (int i = 0; i < 3; i++) {
 			for (int j = 0; j < 3; j++)
 			{
@@ -183,6 +232,7 @@ int main() {
 		std::cout << "Enter the puzzle as a string of 9 numbers with your blank being 0(e.g. 123456780)" << std::endl;
 		std::cin >> inputString;
 		int index = 0;
+		//take an input and format it into a 2d array
 		for (int i = 0; i < 3; i++) {
 			for (int j = 0; j < 3; j++)
 			{
@@ -198,15 +248,6 @@ int main() {
 	//root->printState();
 	std::cout << "Which algorithm do you want: Uniform Cost Search (1), A* Misplaced Tile(2), A* Manhattan Distance(3)" << std::endl;
 	std::cin >> input;
-	if (input == 1) {
-		Search(root, 1);
-	}
-	else if (input == 2) {
-		//TODO
-	}
-	else if (input == 3)
-	{
-		//TODO
-	}
+	Search(root, input);
 	
 }
