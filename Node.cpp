@@ -1,6 +1,6 @@
 #include "Node.h"
 
-Node::Node(int input[3][3],Node* par, int cost) {
+Node::Node(int input[3][3],Node* par, int cost, int level) {
 	this->parent = par;
 	memcpy(this->state, input, 3 * 3 * sizeof(int));
 	this->left = NULL;
@@ -8,6 +8,7 @@ Node::Node(int input[3][3],Node* par, int cost) {
 	this->right = NULL;
 	this->up = NULL;
 	this->cost = cost;
+	this->level = level;
 }
 
 Node* Node::getParent() {
@@ -16,6 +17,10 @@ Node* Node::getParent() {
 
 int Node::getCost() {
 	return this->cost;
+}
+
+int Node::getLevel() {
+	return this->level;
 }
 
 int Node::getBlankX() {
