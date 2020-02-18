@@ -8,6 +8,7 @@
 #include <stack>
 
 int goal[3][3] = { {1,2,3}, {4,5,6}, {7,8,0} };
+Node* stackCurr;
 
 //user defined compare that will be used to create our priority queue and make it based off the costs of the nodes
 struct compareNodes {
@@ -103,7 +104,27 @@ int chooseCost(Node* n1, int option) {
 	}
 }
 
-bool Search(Node* root, int option) {
+void printSolution() {
+	std::stack<Node*> stack;
+	Node* goalNode = new Node(goal, NULL, 0, 0);
+	stack.push(goalNode);
+	while (stackCurr->getParent()) {
+		stack.push(stackCurr->getParent());
+		stackCurr = stackCurr->getParent();
+	}
+
+	std::cout << "Solution path is " << std::endl;
+
+	while (!stack.empty())
+	{
+		stackCurr = stack.top();
+		stackCurr->printState();
+		std::cout << std::endl;
+		stack.pop();
+	}
+}
+
+void Search(Node* root, int option) {
 	//our flag to be returned
 	bool solution = true;
 	//a priority queue holding Node*, with underlying container vector holding Node* and my user defined compare
@@ -120,7 +141,7 @@ bool Search(Node* root, int option) {
 	while (!frontier.empty()) {
 		if (frontier.empty()) {
 			std::cout << "There was no solution" << std::endl;
-			return false;
+			break;
 		}
 		curr = frontier.top();
 		frontier.pop();
@@ -133,11 +154,13 @@ bool Search(Node* root, int option) {
 		solution = compareGoal(curr);
 		if (solution)
 		{
+			stackCurr = curr;
 			std::cout << "There was a solution!" << std::endl;
 			std::cout << "Amount of steps taken was " << curr->getLevel() << std::endl;
 			std::cout << "number of children created and added to frontier is " << numChildrenCreated << std::endl;
 			std::cout << "Number of nodes explored is " << explored.size() << std::endl;
-			return true;
+			printSolution();
+			break;
 		}
 		explored.push_back(curr);
 		//check which operations you can make, use the postion of the blank to see chich operations
@@ -229,12 +252,7 @@ bool Search(Node* root, int option) {
 			}
 		}
 	}
-	/*std::stack<Node*> stack;
-	while (curr->getParent()) {
-		stack.push(curr->getParent());
-	}
-	std::cout << "Solution path is " << std::endl;
-	*/
+	
 }
 
 int main() {
@@ -274,5 +292,5 @@ int main() {
 	std::cout << "Which algorithm do you want: Uniform Cost Search (1), A* Misplaced Tile(2), A* Manhattan Distance(3)" << std::endl;
 	std::cin >> input;
 	Search(root, input);
-	
+	return 0;
 }
