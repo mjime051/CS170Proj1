@@ -13,7 +13,7 @@ struct compareNodes {
 };
 
 bool Search(Node* root, int option) {
-	bool solution = false;
+	bool solution = true;
 	std::priority_queue<Node*, std::vector<Node*>, compareNodes> frontier;
 	frontier.push(root);
 	std::vector<Node*> explored;
@@ -24,24 +24,77 @@ bool Search(Node* root, int option) {
 		}
 		curr = frontier.top();
 		frontier.pop();
-		if (memcmp(curr->state, goal, sizeof(goal) > 0)) {
-			//std::cout << "too small" << std::endl;
-		}
-		else if (memcmp(curr->state, goal, sizeof(goal) < 0))
+		for (int i = 0; i < 3; i++)
 		{
-			//std::cout << memcmp(curr->state, goal, sizeof(goal)) << std::endl;
-			//std::cout << "too large" << std::endl;
+			for (int j = 0; j < 3; j++) {
+				if (curr->state[i][j] != goal[i][j]) {
+					solution = false;
+				}
+			}
 		}
-		else {
-			//std::cout << "just right" << std::endl;
+		if (solution)
+		{
+			return true;
 		}
 		explored.push_back(curr);
-		
+		//check which operations you can make
+		//can move up! so do it
+		std::cout << "Made it here" << std::endl;
+		int currBlankX = curr->getBlankX();
+		int currBlankY = curr->getBlankY();
+		std::cout << "x is " << currBlankX << " and y is " << currBlankY << std::endl;
+		if (curr->getBlankX() != 0)
+		{
+			int temp = curr->state[currBlankX - 1][currBlankY];
+			int newState[3][3];
+			memcpy(newState, curr->state, 3 * 3 * sizeof(int));
+			newState[currBlankX-1][currBlankY] = 0;
+			newState[currBlankX][currBlankY] = temp;
+			//create new child
+			Node* childUp = new Node(newState, curr, curr->getCost() + 1);
+			childUp->printState();
+		}
+		//can move down! so do it
+		if (curr->getBlankX() != 2)
+		{
+			int temp = curr->state[currBlankX + 1][currBlankY];
+			int newState[3][3];
+			memcpy(newState, curr->state, 3 * 3 * sizeof(int));
+			newState[currBlankX + 1][currBlankY] = 0;
+			newState[currBlankX][currBlankY] = temp;
+			//create new child
+			Node* childUp = new Node(newState, curr, curr->getCost() + 1);
+			childUp->printState();
+		}
+		//can move left! so do it
+		if (curr->getBlankY() != 0)
+		{
+			int temp = curr->state[currBlankX][currBlankY-1];
+			int newState[3][3];
+			memcpy(newState, curr->state, 3 * 3 * sizeof(int));
+			newState[currBlankX][currBlankY-1] = 0;
+			newState[currBlankX][currBlankY] = temp;
+			//create new child
+			Node* childUp = new Node(newState, curr, curr->getCost() + 1);
+			childUp->printState();
+		}
+		//can move right! so do it
+		if (curr->getBlankY() != 2)
+		{
+			int temp = curr->state[currBlankX][currBlankY + 1];
+			int newState[3][3];
+			memcpy(newState, curr->state, 3 * 3 * sizeof(int));
+			newState[currBlankX][currBlankY] = 0;
+			newState[currBlankX][currBlankY + 1] = temp;
+			//create new child
+			Node* childUp = new Node(newState, curr, curr->getCost() + 1);
+			childUp->printState();
+		}
 	}
 }
 
 int main() {
-	int puzzle[3][3] = { {1,2,3}, {4,5,6}, {7,8,0} };
+	int puzzle[3][3] = { {1,2,3}, {0,4,6}, {7,5,8} };
 	int input = 0;
 	char inputString [10];
 	std::cout << "Would you like to run the program with a test puzzle(1) or input your own(2)?" << std::endl;
