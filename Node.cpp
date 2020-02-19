@@ -3,10 +3,6 @@
 Node::Node(int input[3][3],Node* par, int cost, int level) {
 	this->parent = par;
 	memcpy(this->state, input, 3 * 3 * sizeof(int));
-	this->left = NULL;
-	this->down = NULL;
-	this->right = NULL;
-	this->up = NULL;
 	this->cost = cost;
 	this->level = level;
 }
@@ -52,20 +48,4 @@ void Node::printState() {
 		}
 		std::cout << std::endl;
 	}
-}
-
-void Node::setLeft(Node* child) {
-	this->left = child;
-}
-
-void Node::setDown(Node* child) {
-	this->down = child;
-}
-
-void Node::setRight(Node* child) {
-	this->right = child;
-}
-
-void Node::setUp(Node* child) {
-	this->up = child;
 }
