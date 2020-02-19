@@ -10,25 +10,6 @@
 
 int goal[3][3] = { {1,2,3}, {4,5,6}, {7,8,0} };
 Node* stackCurr;
-//std::map<int, std::pair<int, int>> map;
-std::pair<int, int> first(0, 0);
-std::pair<int, std::pair<int, int>> index00(1, first);
-std::pair<int, int> second(0, 1);
-std::pair<int, std::pair<int, int>> index01(2, second);
-std::pair<int, int> third(0, 2);
-std::pair<int, std::pair<int, int>> index02(3, third);
-std::pair<int, int> fourth(1, 0);
-std::pair<int, std::pair<int, int>> index10(4, fourth);
-std::pair<int, int> fifth(1, 1);
-std::pair<int, std::pair<int, int>> index11(5, fifth);
-std::pair<int, int> sixth(1, 2);
-std::pair<int, std::pair<int, int>> index12(6, sixth);
-std::pair<int, int> seventh(2, 0);
-std::pair<int, std::pair<int, int>> index20(7, seventh);
-std::pair<int, int> eighth(2, 1);
-std::pair<int, std::pair<int, int>> index21(8, eighth);
-std::pair<int, int> ninth(2, 2);
-std::pair<int, std::pair<int, int>> index22(0, ninth);
 std::vector<std::pair<int, std::pair<int,int>>> vec;
 //user defined compare that will be used to create our priority queue and make it based off the costs of the nodes
 struct compareNodes {
@@ -105,22 +86,24 @@ int numMismatch(int arr[3][3]) {
 }
 
 void initMap() {
-	
-	/*for (int i = 0; i < 3; i++) {
-		for (int j = 0; j < 3; j++) {
-			index.first = i;
-			index.second = j;
-			map[count] = index;
-			count++;
-		}
-	}
-	std::map<int, std::pair<int, int>>::iterator it = map.begin();
-	while (it != map.end()) {
-		int key = it->first;
-		std::pair<int, int> pair = it->second;
-		std::cout << "key is " << key << " Pair first is " << pair.first << " and second is " << pair.second << std::endl;
-		it++;
-	}*/
+	std::pair<int, int> first(0, 0);
+	std::pair<int, std::pair<int, int>> index00(1, first);
+	std::pair<int, int> second(0, 1);
+	std::pair<int, std::pair<int, int>> index01(2, second);
+	std::pair<int, int> third(0, 2);
+	std::pair<int, std::pair<int, int>> index02(3, third);
+	std::pair<int, int> fourth(1, 0);
+	std::pair<int, std::pair<int, int>> index10(4, fourth);
+	std::pair<int, int> fifth(1, 1);
+	std::pair<int, std::pair<int, int>> index11(5, fifth);
+	std::pair<int, int> sixth(1, 2);
+	std::pair<int, std::pair<int, int>> index12(6, sixth);
+	std::pair<int, int> seventh(2, 0);
+	std::pair<int, std::pair<int, int>> index20(7, seventh);
+	std::pair<int, int> eighth(2, 1);
+	std::pair<int, std::pair<int, int>> index21(8, eighth);
+	std::pair<int, int> ninth(2, 2);
+	std::pair<int, std::pair<int, int>> index22(0, ninth);
 	vec.push_back(index00);
 	vec.push_back(index01);
 	vec.push_back(index02);
@@ -130,6 +113,10 @@ void initMap() {
 	vec.push_back(index20);
 	vec.push_back(index21);
 	vec.push_back(index22);
+	/*for (size_t i = 0; i < vec.size(); i++)
+	{
+		std::cout << "Index " << i << " is " << vec[i].second.first << vec[i].second.second << std::endl;
+	}*/
 }
 
 int numManhattan(int arr[3][3]) {
@@ -139,10 +126,12 @@ int numManhattan(int arr[3][3]) {
 	{
 		for (int l = 0; l < 3; l++) {
 			if (arr[k][l] != goal[k][l]) {
-				int val = arr[k][l];
-				count += abs(vec.at(it).second.first - k) + abs(vec.at(it).second.second - l);
-				it++;
+				//std::cout << it << std::endl;
+				int val = arr[k][l] - 1;
+				//std::cout << "value at " << val << " is " << vec[val].second.first << vec[val].second.second << std::endl;
+				count += abs(vec[val].second.first - k) + abs(vec[val].second.second - l);
 			}
+			it++;
 		}
 	}
 	//std::cout << count << std::endl;
@@ -199,7 +188,7 @@ void Search(Node* root, int option) {
 	int numChildrenCreated = 0;
 	//Loop until our frontier is empty or we find a solution
 	while (!frontier.empty()) {
-		std::cout << frontier.size() << std::endl;
+		//std::cout << frontier.size() << std::endl;
 		curr = frontier.top();
 		frontier.pop();
 		//this is equivalent to checking the frontier when expanding our nodes, we pretty much add duplicates into frontier
