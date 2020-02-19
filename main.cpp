@@ -6,14 +6,34 @@
 #include <iterator>
 #include <math.h>
 #include <stack>
+#include <map>
 
 int goal[3][3] = { {1,2,3}, {4,5,6}, {7,8,0} };
 Node* stackCurr;
-
+//std::map<int, std::pair<int, int>> map;
+std::pair<int, int> first(0, 0);
+std::pair<int, std::pair<int, int>> index00(1, first);
+std::pair<int, int> second(0, 1);
+std::pair<int, std::pair<int, int>> index01(2, second);
+std::pair<int, int> third(0, 2);
+std::pair<int, std::pair<int, int>> index02(3, third);
+std::pair<int, int> fourth(1, 0);
+std::pair<int, std::pair<int, int>> index10(4, fourth);
+std::pair<int, int> fifth(1, 1);
+std::pair<int, std::pair<int, int>> index11(5, fifth);
+std::pair<int, int> sixth(1, 2);
+std::pair<int, std::pair<int, int>> index12(6, sixth);
+std::pair<int, int> seventh(2, 0);
+std::pair<int, std::pair<int, int>> index20(7, seventh);
+std::pair<int, int> eighth(2, 1);
+std::pair<int, std::pair<int, int>> index21(8, eighth);
+std::pair<int, int> ninth(2, 2);
+std::pair<int, std::pair<int, int>> index22(0, ninth);
+std::vector<std::pair<int, std::pair<int,int>>> vec;
 //user defined compare that will be used to create our priority queue and make it based off the costs of the nodes
 struct compareNodes {
 	bool operator()(Node* n1, Node* n2) {
-		return n1->getCost() > n2->getCost();
+		return (n1->getCost() + n1->getLevel()) > (n2->getCost() + n2->getLevel());
 	}
 };
 
@@ -46,31 +66,37 @@ bool compareGoal(Node* n1) {
 }
 
 bool checkExplored(Node* n1, std::vector<Node*> explored) {
-	
+	//std::cout << "Checking if this state is in explored yet" << std::endl;
+	//n1->printState();
 	if (explored.size() != 0)
 	{
 		for (int exploredIndex = 0; exploredIndex < explored.size(); exploredIndex++)
 		{
+			//std::cout << "Comparing to " << std::endl;
+			//explored.at(exploredIndex)->printState();
 			if (compareStates(n1, explored.at(exploredIndex))) {
+				//std::cout << "true my dude" << std::endl;
 				return true;
 			}
 		}
+		//std::cout << "false" << std::endl;
 		return false;
 	}
 	else
 	{
+		//std::cout << "false cause empty" << std::endl;
 		return false;
 	}
 }
 
-int numMismatch(Node* n1) {
+int numMismatch(int arr[3][3]) {
 	//go through the state of the node and see how many values at each index match the values in the goal state
 	//increment for each value that is not == to goal state value
 	int count = 0;
 	for (int i = 0; i < 3; i++)
 	{
 		for (int j = 0; j < 3; j++) {
-			if (n1->state[i][j] != goal[i][j]) {
+			if (arr[i][j] != goal[i][j]) {
 				count++;
 			}
 		}
@@ -78,29 +104,63 @@ int numMismatch(Node* n1) {
 	return count;
 }
 
-int numManhattan(Node* n1) {
-	int count = 0;
-	for (int i = 0; i < 3; i++)
-	{
+void initMap() {
+	
+	/*for (int i = 0; i < 3; i++) {
 		for (int j = 0; j < 3; j++) {
-			count += abs((n1->state[i][j] - 1) % 3 - i % 3) + abs((n1->state[i][j] - 1) / 3 - i / 3);
+			index.first = i;
+			index.second = j;
+			map[count] = index;
+			count++;
 		}
 	}
+	std::map<int, std::pair<int, int>>::iterator it = map.begin();
+	while (it != map.end()) {
+		int key = it->first;
+		std::pair<int, int> pair = it->second;
+		std::cout << "key is " << key << " Pair first is " << pair.first << " and second is " << pair.second << std::endl;
+		it++;
+	}*/
+	vec.push_back(index00);
+	vec.push_back(index01);
+	vec.push_back(index02);
+	vec.push_back(index10);
+	vec.push_back(index11);
+	vec.push_back(index12);
+	vec.push_back(index20);
+	vec.push_back(index21);
+	vec.push_back(index22);
+}
+
+int numManhattan(int arr[3][3]) {
+	int count = 0;
+	int it = 0;
+	for (int k = 0; k < 3; k++)
+	{
+		for (int l = 0; l < 3; l++) {
+			if (arr[k][l] != goal[k][l]) {
+				int val = arr[k][l];
+				count += abs(vec.at(it).second.first - k) + abs(vec.at(it).second.second - l);
+				it++;
+			}
+		}
+	}
+	//std::cout << count << std::endl;
 	return count;
 }
 
-int chooseCost(Node* n1, int option) {
+int chooseCost(int arr[3][3], int option) {
 	//choose the corresponding cost based on what input was passed in by user
 	if (option == 1)
 	{
-		return n1->getCost() + 1;
+		return 0;
 	}
 	else if(option == 2)
 	{
-		return n1->getCost() + 1 + numMismatch(n1);
+		return numMismatch(arr);
 	}
 	else if (option == 3) {
-		return n1->getCost() + 1 + numManhattan(n1);
+		return numManhattan(arr);
 	}
 }
 
@@ -139,18 +199,11 @@ void Search(Node* root, int option) {
 	int numChildrenCreated = 0;
 	//Loop until our frontier is empty or we find a solution
 	while (!frontier.empty()) {
-		if (frontier.empty()) {
-			std::cout << "There was no solution" << std::endl;
-			break;
-		}
+		std::cout << frontier.size() << std::endl;
 		curr = frontier.top();
 		frontier.pop();
 		//this is equivalent to checking the frontier when expanding our nodes, we pretty much add duplicates into frontier
 		//but this will catch the duplicates and skip them
-		if (checkExplored(curr,explored))
-		{
-			continue;
-		}
 		solution = compareGoal(curr);
 		if (solution)
 		{
@@ -159,100 +212,122 @@ void Search(Node* root, int option) {
 			std::cout << "Amount of steps taken was " << curr->getLevel() << std::endl;
 			std::cout << "number of children created and added to frontier is " << numChildrenCreated << std::endl;
 			std::cout << "Number of nodes explored is " << explored.size() << std::endl;
+			/*for (size_t s = 0; s < explored.size(); s++)
+			{
+				explored.at(s)->printState();
+				std::cout << "Heurtistic is " << explored.at(s)->getCost() << " path cost is " << explored.at(s)->getLevel() << std::endl;
+				std::cout << std::endl;
+			}*/
 			printSolution();
 			break;
 		}
-		explored.push_back(curr);
-		//check which operations you can make, use the postion of the blank to see chich operations
-		//are valid
-		int currBlankX = curr->getBlankX();
-		int currBlankY = curr->getBlankY();
-		//if the blank is in the top row x==0 then it cannot move up, so check x != 0 is true to move blank up
-		if (currBlankX != 0)
+		//std::cout << "checking frontier" << std::endl;
+		if (!checkExplored(curr,explored))
 		{
-			//need to save the value in the space where the blank is going to move to
-			int temp = curr->state[currBlankX - 1][currBlankY];
-			//create a copy of the state we are currently at
-			int newState[3][3];
-			memcpy(newState, curr->state, 3 * 3 * sizeof(int));
-			//swap the blank and the value
-			newState[currBlankX-1][currBlankY] = 0;
-			newState[currBlankX][currBlankY] = temp;
-			//create new child
-			Node* childUp = new Node(newState, curr, chooseCost(curr,option), curr->getLevel() + 1);
-			bool addChildUp = checkExplored(childUp,explored);
-			//check explored set for the newly created child, if not in explored add to frontier
-			if (!addChildUp)
+			//curr->printState();
+			explored.push_back(curr);
+			//check which operations you can make, use the postion of the blank to see chich operations
+			//are valid
+			int currBlankX = curr->getBlankX();
+			int currBlankY = curr->getBlankY();
+			//if the blank is in the top row x==0 then it cannot move up, so check x != 0 is true to move blank up
+			if (currBlankX != 0)
 			{
+				//need to save the value in the space where the blank is going to move to
+				int temp = curr->state[currBlankX - 1][currBlankY];
+				//create a copy of the state we are currently at
+				int newState[3][3];
+				memcpy(newState, curr->state, 3 * 3 * sizeof(int));
+				//swap the blank and the value
+				newState[currBlankX - 1][currBlankY] = 0;
+				newState[currBlankX][currBlankY] = temp;
+				//create new child
+				Node* childUp = new Node(newState, curr, chooseCost(newState, option), curr->getLevel() + 1);
+				//std::cout << "checking at creation" << std::endl;
+				bool addChildUp = !checkExplored(childUp, explored);
 				numChildrenCreated++;
-				frontier.push(childUp);
+				//check explored set for the newly created child, if not in explored add to frontier
+				if (addChildUp)
+				{
+					//std::cout << "Added up to frontier" << std::endl;
+					frontier.push(childUp);
+				}
+			}
+			//if the blank is in the bottom row x==2 then it cannot move down, so check x != 2 is true to move blank down
+			if (currBlankX != 2)
+			{
+				//need to save the value in the space where the blank is going to move to
+				int temp = curr->state[currBlankX + 1][currBlankY];
+				//create a copy of the state we are currently at
+				int newState[3][3];
+				memcpy(newState, curr->state, 3 * 3 * sizeof(int));
+				//swap the blank and the value
+				newState[currBlankX + 1][currBlankY] = 0;
+				newState[currBlankX][currBlankY] = temp;
+				//create new child
+				Node* childDown = new Node(newState, curr, chooseCost(newState, option), curr->getLevel() + 1);
+				//std::cout << "checking at creation" << std::endl;
+				bool addChildDown = !checkExplored(childDown, explored);
+				numChildrenCreated++;
+				//check explored set for the newly created child, if not in explored add to frontier
+				if (addChildDown)
+				{
+					//std::cout << "Added down to frontier" << std::endl;
+					frontier.push(childDown);
+				}
+			}
+			//if the blank is in the left col y==0 then it cannot move up, so check y != 0 is true to move blank left
+			if (currBlankY != 0)
+			{
+				//need to save the value in the space where the blank is going to move to
+				int temp = curr->state[currBlankX][currBlankY - 1];
+				//create a copy of the state we are currently at
+				int newState[3][3];
+				memcpy(newState, curr->state, 3 * 3 * sizeof(int));
+				//swap the blank and the value
+				newState[currBlankX][currBlankY - 1] = 0;
+				newState[currBlankX][currBlankY] = temp;
+				//create new child
+				Node* childLeft = new Node(newState, curr, chooseCost(newState, option), curr->getLevel() + 1);
+				//std::cout << "checking at creation" << std::endl;
+				bool addChildLeft = !checkExplored(childLeft, explored);
+				numChildrenCreated++;
+				//check explored set for the newly created child, if not in explored add to frontier
+				if (addChildLeft)
+				{
+					//std::cout << "Added left to frontier" << std::endl;
+					frontier.push(childLeft);
+				}
+			}
+			//if the blank is in the right col y==0 then it cannot move up, so check y != 0 is true to move blank right
+			if (currBlankY != 2)
+			{
+				//need to save the value in the space where the blank is going to move to
+				int temp = curr->state[currBlankX][currBlankY + 1];
+				//create a copy of the state we are currently at
+				int newState[3][3];
+				memcpy(newState, curr->state, 3 * 3 * sizeof(int));
+				//swap the blank and the value
+				newState[currBlankX][currBlankY + 1] = 0;
+				newState[currBlankX][currBlankY] = temp;
+				//create new child
+				Node* childRight = new Node(newState, curr, chooseCost(newState, option), curr->getLevel() + 1);
+				//std::cout << "checking at creation" << std::endl;
+				bool addChildRight = !checkExplored(childRight, explored);
+				numChildrenCreated++;
+				//check explored set for the newly created child, if not in explored add to frontier
+				if (addChildRight)
+				{
+					//std::cout << "Added right to frontier" << std::endl;
+					frontier.push(childRight);
+				}
 			}
 		}
-		//if the blank is in the bottom row x==2 then it cannot move down, so check x != 2 is true to move blank down
-		if (currBlankX != 2)
-		{
-			//need to save the value in the space where the blank is going to move to
-			int temp = curr->state[currBlankX + 1][currBlankY];
-			//create a copy of the state we are currently at
-			int newState[3][3];
-			memcpy(newState, curr->state, 3 * 3 * sizeof(int));
-			//swap the blank and the value
-			newState[currBlankX + 1][currBlankY] = 0;
-			newState[currBlankX][currBlankY] = temp;
-			//create new child
-			Node* childDown = new Node(newState, curr, chooseCost(curr,option), curr->getLevel() + 1);
-			bool addChildDown = checkExplored(childDown, explored);
-			//check explored set for the newly created child, if not in explored add to frontier
-			if (!addChildDown)
-			{
-				numChildrenCreated++;
-				frontier.push(childDown);
-			}
-		}
-		//if the blank is in the left col y==0 then it cannot move up, so check y != 0 is true to move blank left
-		if (currBlankY != 0)
-		{
-			//need to save the value in the space where the blank is going to move to
-			int temp = curr->state[currBlankX][currBlankY-1];
-			//create a copy of the state we are currently at
-			int newState[3][3];
-			memcpy(newState, curr->state, 3 * 3 * sizeof(int));
-			//swap the blank and the value
-			newState[currBlankX][currBlankY-1] = 0;
-			newState[currBlankX][currBlankY] = temp;
-			//create new child
-			Node* childLeft = new Node(newState, curr, chooseCost(curr, option), curr->getLevel() + 1);
-			bool addChildLeft = checkExplored(childLeft, explored);
-			//check explored set for the newly created child, if not in explored add to frontier
-			if (!addChildLeft)
-			{
-				numChildrenCreated++;
-				frontier.push(childLeft);
-			}
-		}
-		//if the blank is in the right col y==0 then it cannot move up, so check y != 0 is true to move blank right
-		if (currBlankY != 2)
-		{
-			//need to save the value in the space where the blank is going to move to
-			int temp = curr->state[currBlankX][currBlankY + 1];
-			//create a copy of the state we are currently at
-			int newState[3][3];
-			memcpy(newState, curr->state, 3 * 3 * sizeof(int));
-			//swap the blank and the value
-			newState[currBlankX][currBlankY + 1] = 0;
-			newState[currBlankX][currBlankY] = temp;
-			//create new child
-			Node* childRight = new Node(newState, curr, chooseCost(curr, option), curr->getLevel() + 1);
-			bool addChildRight = checkExplored(childRight, explored);
-			//check explored set for the newly created child, if not in explored add to frontier
-			if (!addChildRight)
-			{
-				numChildrenCreated++;
-				frontier.push(childRight);
-			}
-		}
+		
 	}
-	
+	if (frontier.empty()) {
+		std::cout << "There was no solution" << std::endl;
+	}
 }
 
 int main() {
@@ -291,6 +366,14 @@ int main() {
 	//root->printState();
 	std::cout << "Which algorithm do you want: Uniform Cost Search (1), A* Misplaced Tile(2), A* Manhattan Distance(3)" << std::endl;
 	std::cin >> input;
+	initMap();
 	Search(root, input);
+	/*Node* goalNode = new Node(goal, NULL, 0, 0);
+	std::cout << compareStates(root, goalNode);
+	std::vector<Node*> explored;
+	explored.push_back(goalNode);
+	explored.push_back(root);
+	std::cout << checkExplored(root, explored);
+	*/
 	return 0;
 }
